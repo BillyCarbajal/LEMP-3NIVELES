@@ -155,3 +155,31 @@ El script lo que hara es montar la ruta de los archivos index y crear el archivo
 
 ### Paso 3. Crear archivo de aprovisionamiento del servidor nfs
 Para la maquina Billy-nfs creamos un archivo llamado script-nfs.sh con las siguientes lineas:
+
+	apt install nfs-kernel-server php php-fpm php-mysql php-zip php-dom php-intl php-curl php-mbstring php-gd unzip -y
+	mkdir -p /var/www/html
+	mkdir -p /var/www/moodledata
+	echo "/var/www       192.168.100.3(rw,sync,no_root_squash,no_subtree_check) 192.168.100.4(rw,sync,no_root_squash,no_subtree_check)" >> /etc/exports
+	sed -i 's/^listen .*$/listen = 0.0.0.0:9000/' /etc/php/7.4/fpm/pool.d/www.conf
+	service nfs-kernel-server restart
+	cd /var/www/html
+	wget wget https://downloads.joomla.org/es/cms/joomla4/4-2-5/Joomla_4-2-5-Stable-Full_Package.zip
+	unzip Joomla_4-2-5-Stable-Full_Package.zip
+	rm Joomla_4-2-5-Stable-Full_Package.zip
+	chown -R www-data:www-data ../html
+Lo que hara el script sera instalar los paquetes necesario, crear las rutas para los archivos web, editar el php-fpm, descargar los archivos para la web, modificar el propietario de la carpeta.
+
+### Paso 4. Crear archivo de aprovisionamiento del servidor mysql
+Para la maquina Billy-mysql crearemos un archivo llamado script-mysql con el siguiente contenido:
+
+	apt install default-mysql-server -y
+	mysql -u root << EOF
+	create database lemp_db;
+	create user 'lemp_user'@'%' identified by 'lemp_password';
+	grant all privileges on *.* to 'lemp_user';
+	flush privileges;
+	EOF
+	sed -i 's/bind-address .*/bind-address = 0.0.0.0/' /etc/mysql/mariadb.conf.d/50-server.cnf
+	service mysql restart
+Lo que hara sera instalar mysql, permitir las conexiones desde cualquier IP, y crear el usuario lemp_user con acceso total a la base de datos.
+### Paso 5.
