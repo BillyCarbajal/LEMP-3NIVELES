@@ -182,4 +182,3 @@ Para la maquina Billy-mysql crearemos un archivo llamado script-mysql con el sig
 	sed -i 's/bind-address .*/bind-address = 0.0.0.0/' /etc/mysql/mariadb.conf.d/50-server.cnf
 	service mysql restart
 Lo que hara sera instalar mysql, permitir las conexiones desde cualquier IP, y crear el usuario lemp_user con acceso total a la base de datos.
-### Paso 5.
