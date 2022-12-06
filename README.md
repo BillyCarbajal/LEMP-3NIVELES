@@ -75,15 +75,48 @@ Y añadimos estas líneas que serán las que indicaran el hostname, sistema inst
 ### Paso2. Editamos el archivo de aprovisionamiento del balanceador
 Ahora crearemos en la misma carpeta un archivo llamado "script-balanceador.sh" en el incluiremos las siguientes lineas:
 
-- Para actualizar e instalar los paquetes necesarios:
-
-  apt install openssl nginx -y
-
-- Para editar la configuracion del balacneador nginx:
-
-	cd ls ssdsdd dsfsff
-	dsdssdffsd
+	apt install openssl nginx -y
+	cd /etc/nginx/
+	cat << EOF > nginx.conf
+	user www-data;
+	worker_processes auto;
+	pid /run/nginx.pid;
+	include /etc/nginx/modules-enabled/*.conf;
+	events {
+	worker_connections 768;
+	# multi_accept on;
+	}
+	http {
+	upstream backend {
+	server 192.168.100.3;
+	server 192.168.100.4;
+	}
+	server {
+	listen 80;
+	listen [::]:80;
+	server_name _;
+	return 301 https://$host$request_uri;
+	}
+	server {
+	listen 443 ssl;
+	ssl_certificate /etc/nginx/certificadoss/clave.crt;
+	ssl_certificate_key /etc/nginx/certificadoss/clave.key;
+	location / {
+	proxy_pass http://backend;
+	}
+	}
+	}
+	EOF
+	mkdir certificadoss
+	cd certificadoss
+	openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout clave.key -out clave.crt -subj "/CN=Servidor LEMP"
+	service nginx restart
 	
+Lo que hara el script es instalar y configurar nginx con su certificado ssl
+
+### Paso 3. Crear el archivo de aprovisionamiento para las maquinas nginx
+La maquinas llamadas Billy-nginx1 y Billy-nginx2 usaran el mismo archivo de aprovisionamiento llamado script-nginx.sh que tendra las siguientes lineas:
+
 	
 	
 
